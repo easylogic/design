@@ -26,8 +26,9 @@ import windowList from "../ui/window-list";
 import ImageFileView from "../ui/view/ImageFileView";
 import TimelineProperty from "../ui/control/TimelineProperty";
 import StatusBar from "../ui/view/StatusBar";
-
 import PreviewToolMenu from "../ui/view/PreviewToolMenu";
+import ImageEditorWindow from "../ui/window-list/ImageEditorWindow";
+
 export default class CSSEditor extends UIElement {
   
   initialize () {
@@ -101,6 +102,7 @@ export default class CSSEditor extends UIElement {
         <!-- LoginWindow / -->
         <!-- SignWindow / -->
         <ImageFileView />
+        <ImageEditorWindow />
       </div>
     `;
   }
@@ -121,6 +123,7 @@ export default class CSSEditor extends UIElement {
       StatusBar,
       TimelineProperty,
       PreviewToolMenu,
+      ImageEditorWindow
     };
   }
 

@@ -6,7 +6,7 @@ import icon from "../icon/icon";
 export default class BaseWindow extends UIElement {
 
   template() {
-    return `
+    return /*html*/`
       <div class='window-background'>
         <div class='window ${this.getClassName()}'>
             <div class='window-title' ref="$title">
