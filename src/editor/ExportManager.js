@@ -40,19 +40,23 @@ export default {
 
   generate (editor) {
     var project = editor.selection.currentProject;
+    var current = editor.selection.current;
 
     var css = `${this.makeStyle(project)}`
     var html = `
       ${this.makeSvg(project)}
     `
+    var js = '';
 
-    var js = AnimationExport.generate(project, 'anipa')
+    
 
     html = editor.replaceLocalUrltoRealUrl(html);
     css = editor.replaceLocalUrltoRealUrl(css);
-    js = editor.replaceLocalUrltoRealUrl(js);
+    
+    if (current.is('artboard')) {
+      js = editor.replaceLocalUrltoRealUrl(AnimationExport.generate(current, 'anipa'));
+    }
 
-  
     return { html, css, js }
   },
 
