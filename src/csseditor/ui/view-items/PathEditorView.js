@@ -315,16 +315,16 @@ export default class PathEditorView extends PathTransformEditor {
 
     makePathLayer (pathRect) {
         var { d } = this.pathGenerator.toPath(pathRect.x, pathRect.y, this.scale);
-        var artboard = this.$selection.currentArtboard
+        var project = this.$selection.currentProject
         var layer; 
-        if (artboard) {
+        if (project) {
 
             var x = pathRect.x / this.scale;
             var y = pathRect.y / this.scale;
             var width = pathRect.width / this.scale;
             var height = pathRect.height / this.scale; 
 
-            layer = artboard.add(new SVGPathItem({
+            layer = project.add(new SVGPathItem({
                 width: Length.px(width),
                 height: Length.px(height),
                 d,

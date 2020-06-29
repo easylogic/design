@@ -59,6 +59,8 @@ export default class LayerAppendView extends UIElement {
     createLayerTemplate () {
         const { type, text, color, width, height } = this.state;
         switch(type) {
+        case 'artboard':
+            return /*html*/`<div class='draw-item' style='background-color: white'></div>`
         case 'rect':
             return /*html*/`<div class='draw-item' style='background-color: ${color}'></div>`
         case 'circle':

@@ -136,6 +136,10 @@ export default class ElementView extends UIElement {
 
     }
 
+    checkInAreaForLayers (target, rect) {
+        return target.checkInAreaForLayers(rect);
+    }
+
     movePointer (dx, dy) {
         const isShiftKey = this.$config.get('bodyEvent').shiftKey;
 
@@ -166,18 +170,21 @@ export default class ElementView extends UIElement {
             rect.x2 = Length.px(rect.x.value + rect.width.value);
             rect.y2 = Length.px(rect.y.value + rect.height.value); 
 
-            var artboard = this.$selection.currentArtboard;
-            var items = this.$selection.items; 
-            if (artboard) {
+            var project = this.$selection.currentProject;
+            var items = []; 
+            if (project) {
                 Object.keys(rect).forEach(key => {
                     rect[key].div(this.$editor.scale)
                 })
-    
-                var items = artboard.checkInAreaForLayers(rect);
 
                 if (rect.width.value === 0 && rect.height.value === 0) {
                     items = [] 
-                }                 
+                } else {
+                    // 프로젝트 내에 있는 모든 객체 검색 
+                    project.artboards.forEach(artboard => {
+                        items.push(...artboard.checkInAreaForLayers(rect))
+                    })
+                }
     
                 if (this.$selection.select(...items)) {
                     this.selectCurrentForBackgroundView(...items)
@@ -216,24 +223,21 @@ export default class ElementView extends UIElement {
 
         if (this.$editor.isSelectionMode()) {
 
-            var artboard = this.$selection.currentArtboard;
+            var project = this.$selection.currentProject;
             var items = [] 
-            if (artboard) {
+            if (project) {
                 Object.keys(rect).forEach(key => {
                     rect[key].div(this.$editor.scale)
                 })
 
-                items = artboard.checkInAreaForLayers(rect);
+                // 프로젝트 내에 있는 모든 객체 검색 
+                project.artboards.forEach(artboard => {
+                    items.push(...artboard.checkInAreaForLayers(rect))
+                })
 
                 if (rect.width.value === 0 && rect.height.value === 0) {
-                    items = [artboard] 
+                    items = [] 
                 } 
-
-                if (items.length === 0) {
-                    if (artboard.checkInArea(rect)) {
-                        items = [artboard]
-                    }
-                }
 
                 if (this.$selection.select(...items)) {
                     this.selectCurrentForBackgroundView(...items)
@@ -290,6 +294,7 @@ export default class ElementView extends UIElement {
     [POINTERSTART('$view .element-item') + IF('checkEditMode')  + MOVE('calculateMovedElement') + END('calculateEndedElement')] (e) {
         this.startXY = e.xy ; 
         this.$element = e.$dt;
+
 
         if (this.$element.hasClass('text') && this.$element.hasClass('selected')) {
             return false; 
@@ -378,6 +383,7 @@ export default class ElementView extends UIElement {
 
 
     [BIND('$view')] () {
+    
         return {
             style: {
                 // 'background-image': createGridLine(100),
@@ -389,8 +395,8 @@ export default class ElementView extends UIElement {
     }    
 
     [EVENT('addElement')] () {
-        var artboard = this.$selection.currentArtboard || { html : ''} 
-        var html = artboard.html;
+        var project = this.$selection.currentProject || { html : ''} 
+        var html = project.html;
 
         this.setState({ html }, false)
         // this.bindData('$view');
@@ -407,8 +413,7 @@ export default class ElementView extends UIElement {
             $selectedElement.forEach(it => it.removeClass('selected'))
         }
 
-        if(args.length) {
-
+        if (args.length) {
             var selector = args.map(it => `[data-id='${it.id}']`).join(',')
 
             var list = this.$el.$$(selector);
@@ -417,13 +422,10 @@ export default class ElementView extends UIElement {
                 this.state.cachedCurrentElement[it.attr('data-id')] = it; 
                 it.addClass('selected')
             })
-            
-        } else {
-            this.$selection.select(this.$selection.currentArtboard)
-        }    
+    
+        }
 
         this.emit('refreshSelectionTool')
-
     }
 
 
@@ -507,26 +509,31 @@ export default class ElementView extends UIElement {
 
     }    
 
-    [EVENT('playTimeline', 'moveTimeline')] () {
+    [EVENT('playTimeline', 'moveTimeline')] (artboard) {
 
-        var artboard = this.$selection.currentArtboard;
 
-        if (artboard) {
-            var timeline = artboard.getSelectedTimeline();
-            timeline.animations.map(it => artboard.searchById(it.id)).forEach(current => {
-                // 레이어 업데이트 사항 중에 updateFunction 으로 업데이트 되는 부분 
-                // currentTime 도 매번 업데이트 되기 때문에 
-                // playbackRate 도 매번 업데이트 되고
-                // 그래서 막는게 필요하다.                 
-                // timeline 에서 실행되는것에 따라서  layer 에서 각자 알아서 업데이트 한다. 
-                this.updateTimelineElement(current, true, false);
-            })
-        }
+        var timeline = artboard.getSelectedTimeline();
+        timeline.animations.map(it => artboard.searchById(it.id)).forEach(current => {
+            // 레이어 업데이트 사항 중에 updateFunction 으로 업데이트 되는 부분 
+            // currentTime 도 매번 업데이트 되기 때문에 
+            // playbackRate 도 매번 업데이트 되고
+            // 그래서 막는게 필요하다.                 
+            // timeline 에서 실행되는것에 따라서  layer 에서 각자 알아서 업데이트 한다. 
+            this.updateTimelineElement(current, true, false);
+        })
     }    
 
+    /**
+     * addElement 와 동일한 기능 
+     * 
+     * isRefreshSelectionTool 옵션에 따라 selection 을 정의  
+     * 
+     * 기본적으로 project 내부의 전체 html 을 만들고 기존 dom 과 비교해서 업데이트 한다. 
+     * @param {boolean} isRefreshSelectionTool 
+     */
     [EVENT('refreshAllCanvas')] (isRefreshSelectionTool = true) {
-        var artboard = this.$selection.currentArtboard || { html : ''} 
-        var html = artboard.html
+        var project = this.$selection.currentProject || { html : ''} 
+        var html = project.html
 
         this.setState({ html }, false)
         // this.bindData('$view');

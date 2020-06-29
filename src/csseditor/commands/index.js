@@ -8,7 +8,6 @@ import addVideo from "./addVideo";
 import addArtBoard from "./addArtBoard";
 import addProject from "./addProject";
 import addLayer from "./addLayer";
-import selectArtboard from './selectArtboard';
 import newComponent from "./newComponent";
 import addComponentType from "./addComponentType";
 import clipboardCopy from "./clipboard.copy";
@@ -170,7 +169,6 @@ export default {
     refreshElement,
     refreshProject,
     resizeArtBoard,
-    selectArtboard,
     setAttribute,  
     sortBottom,
     sortCenter,

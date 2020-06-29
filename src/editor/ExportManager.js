@@ -40,20 +40,13 @@ export default {
 
   generate (editor) {
     var project = editor.selection.currentProject;
-    var artboard = editor.selection.currentArtboard;
 
-    var css = `
-${this.makeStyle(project)}
-${this.makeStyle(artboard, `
-  left: 0px;
-  top: 0px;
-`)}`
+    var css = `${this.makeStyle(project)}`
     var html = `
-${artboard.html}
-${this.makeSvg(project)}
+      ${this.makeSvg(project)}
     `
 
-    var js = AnimationExport.generate(artboard, 'anipa')
+    var js = AnimationExport.generate(project, 'anipa')
 
     html = editor.replaceLocalUrltoRealUrl(html);
     css = editor.replaceLocalUrltoRealUrl(css);

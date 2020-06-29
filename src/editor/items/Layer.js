@@ -32,22 +32,4 @@ export class Layer extends DomItem {
       tagName: this.json.tagName
     }
   }
-
-
-  get screenX () { 
-    if (this.json.parent) {
-        return Length.px( this.json.parent.screenX.value + (this.json.x || zero).value )
-    }
-
-    return this.json.x || Length.z() 
-  }
-  get screenY () { 
-
-      if (this.json.parent) {
-          return Length.px( this.json.parent.screenY.value + (this.json.y || zero).value )
-      }
-
-      return this.json.y || Length.z() 
-  }  
-
 }

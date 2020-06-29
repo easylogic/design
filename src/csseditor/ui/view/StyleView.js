@@ -82,7 +82,7 @@ export default class StyleView extends UIElement {
     this.changeStyleHead(project)
 
     // artboard setting 
-    project.artboards.forEach(item => this.changeStyleHead(item))
+    project.layers.forEach(item => this.changeStyleHead(item))
   }
 
   changeStyleHead (item) {
@@ -117,7 +117,6 @@ export default class StyleView extends UIElement {
 
     let isChanged = false; 
     this.refs.$head.$$(selector).forEach(it => {
-      console.log(it.attr('data-timestamp'));
       if (item.isChanged(it.attr('data-timestamp'))) {
         isChanged = true;       
         it.remove();
@@ -232,7 +231,7 @@ export default class StyleView extends UIElement {
     })
 
     if (removeStyleSelector.length) {
-      this.refs.$head.$$(removeStyleSelector).forEach(it => {
+      this.refs.$head.$$(removeStyleSelector.join(',')).forEach(it => {
         it.remove();
       })  
     }

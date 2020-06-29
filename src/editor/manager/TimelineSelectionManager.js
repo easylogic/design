@@ -11,10 +11,10 @@ export class TimelineSelectionManager {
   }
 
   currentArtBoard (callback) {
-    var artboard = this.$editor.selection.currentArtboard;
+    var current = this.$editor.selection.current;
 
-    if (artboard) {
-      callback && callback (artboard);
+    if (current && current.is('artboard')) {
+      callback && callback (current);
     }
   }
 
