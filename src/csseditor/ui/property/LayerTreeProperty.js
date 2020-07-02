@@ -101,7 +101,7 @@ export default class LayerTreeProperty extends BaseProperty {
   getIcon (item) {
     // return '';
 
-    if (item.isGroup) {
+    if (item.isGroup && item.is('artboard') === false) {
       return icon.group
     }
 

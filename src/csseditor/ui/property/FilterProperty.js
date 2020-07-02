@@ -14,6 +14,9 @@ export default class FilterProperty extends BaseProperty {
     return this.$i18n('filter.property.title');
   }
 
+  afterRender() {
+    this.show();
+  }
 
   hasKeyframe () {
     return true; 

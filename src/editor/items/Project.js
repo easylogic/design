@@ -1,5 +1,6 @@
 import { AssetItem } from "./AssetItem";
 import { ComponentManager } from "../manager/ComponentManager";
+import { Length } from "../unit/Length";
 
 export class Project extends AssetItem {
   getDefaultTitle() {
@@ -12,6 +13,14 @@ export class Project extends AssetItem {
 
   get parent () {
     return null;
+  }
+
+  get screenX () {
+    return Length.z();
+  }
+
+  get screenY () {
+    return Length.z();
   }
 
   toRootVariableCSS () {
