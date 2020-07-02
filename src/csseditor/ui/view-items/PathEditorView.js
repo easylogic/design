@@ -393,10 +393,7 @@ export default class PathEditorView extends PathTransformEditor {
 
             var layer = this.makePathLayer(pathRect)
             if (layer) {
-                // this.$selection.empty(layer);
-    
                 this.emit('refreshAll')
-                // this.emit('refreshSelection');
             }
         }
         

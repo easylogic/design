@@ -49,6 +49,9 @@ export class SVGBrushItem extends SVGItem {
       this.setScreenY(Length.px(obj.rect.y))
     }
 
+    this.setCache();  // 캐쉬를 해줘야 최종 업데이트가 된다. 
+    this.changed();    
+
   }
   
   setCache () {

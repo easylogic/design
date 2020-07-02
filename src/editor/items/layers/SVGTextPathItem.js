@@ -40,6 +40,9 @@ export class SVGTextPathItem extends SVGItem {
     if(obj.segments) {
       this.json.path.resetSegment(obj.segments);
     }
+    
+    this.setCache();  // 캐쉬를 해줘야 최종 업데이트가 된다. 
+    this.changed();    
   }
   
   setCache () {

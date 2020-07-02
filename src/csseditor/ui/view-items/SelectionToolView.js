@@ -282,6 +282,7 @@ export default class SelectionToolView extends SelectionToolBind {
 
         this.removeOriginalRect();
 
+        // 가이드 영역 캐쉬 
         this.guideView.makeGuideCache();        
 
         var current = this.$selection.current;
