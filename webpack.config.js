@@ -157,7 +157,7 @@ module.exports = {
     new WebpackPwaManifest({
       name: 'EasyLogic Studio',
       short_name: 'EasyLogic',
-      description: 'Fantastic Web Design Tool',
+      description: 'Fantastic Prototyping Tool',
       background_color: '#ffffff',
       crossorigin: 'use-credentials', //can be null, use-credentials or anonymous
       ios: {

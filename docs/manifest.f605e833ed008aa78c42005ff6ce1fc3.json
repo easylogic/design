@@ -36,6 +36,6 @@
   "orientation": "portrait",
   "display": "standalone",
   "start_url": ".",
-  "description": "Fantastic Web Design Tool",
+  "description": "Fantastic Prototyping Tool",
   "background_color": "#ffffff"
 }

@@ -44,7 +44,7 @@ module.exports = {
     library: "EasylogicStudio",
     libraryTarget: "umd",
     path: __dirname + "/dist",
-    filename: 'editor.js'
+    filename: 'design.js'
   },
   mode: 'production',
   // devtool: 'source-map',
