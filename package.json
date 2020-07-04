@@ -1,8 +1,8 @@
 {
-  "name": "@easylogic/editor",
+  "name": "@easylogic/design",
   "version": "0.9.53",
-  "description": "Fantastic Web Design Tool ",
-  "main": "./dist/editor.js",
+  "description": "Fantastic Prototyping Tool ",
+  "main": "./dist/design.js",
   "directories": {
     "test": "test"
   },
