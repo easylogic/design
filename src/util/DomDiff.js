@@ -70,6 +70,7 @@ function getProps (attributes) {
 }
 
 function updateElement (parentElement, oldEl, newEl, i) {
+    // console.log(parentElement, oldEl, newEl)
     if (!oldEl) {
         parentElement.appendChild(newEl.cloneNode(true));
     } else if (!newEl) {
@@ -90,7 +91,7 @@ function updateElement (parentElement, oldEl, newEl, i) {
 }
 
 const children = (el) => {
-    var element = el.firstElementChild; 
+    var element = el.firstChild; 
 
     if (!element) {
         return [] 
@@ -100,7 +101,7 @@ const children = (el) => {
 
     do {
         results.push(element);
-        element = element.nextElementSibling;
+        element = element.nextSibling;
     } while (element);
 
     return results; 

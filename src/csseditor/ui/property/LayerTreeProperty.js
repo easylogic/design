@@ -209,7 +209,6 @@ export default class LayerTreeProperty extends BaseProperty {
 
   [DRAGOVER(`$layerList .layer-item:not(.${DRAG_START_CLASS})`) + PREVENT] (e) {
     var targetLayerId = e.$dt.attr('data-layer-id') 
-    // console.log({targetLayerId, x: e.offsetX, y: e.offsetY});
 
     this.state.lastDragOverItemId = targetLayerId;
     this.state.lastDragOverPosition = e.$dt.rect().top;
