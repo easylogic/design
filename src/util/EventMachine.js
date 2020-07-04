@@ -346,8 +346,8 @@ export default class EventMachine {
       var [elName, ...checker] = methodName.split(CHECK_SAPARATOR).map(it => it.trim())
 
       checker = checker.map(it => it.trim())
-
-      var isVdom = checker.indexOf(VDOM.value) > -1;
+      
+      const isVdom = Boolean(checker.filter(it => VDOM.includes(it)).length);
 
       if (this.refs[elName]) {
         

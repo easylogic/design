@@ -27,8 +27,11 @@ export class SelectionManager {
   constructor() {
 
     this.project = null;
+    this.artboard = null;
     this.items = [];
     this.itemKeys = {} 
+    this.ids = [];
+    this.idsString = '';    
     this.colorsteps = []
   }
 
@@ -36,6 +39,8 @@ export class SelectionManager {
     this.colorsteps = []    
     this.items = [];
     this.itemKeys = {} 
+    this.ids = []; 
+    this.idsString = '';   
   }
 
   /**
@@ -90,17 +95,12 @@ export class SelectionManager {
       return true; 
     }
 
-    var setA = new Set(list);
-    var setB = new Set(this.items);
+    const listA = list.map(it => it.id);
+    listA.sort();
 
-    var equalCount = 0; 
-    for (var elem of setB) {
-        if (setA.has(elem)) {
-          equalCount++;
-        }
-    }
+    const isDifferent = listA.join(',') != this.idsString;
 
-    return setB.size != equalCount;    
+    return isDifferent;
   }
 
   select(...args) {
@@ -119,6 +119,9 @@ export class SelectionManager {
     this.items.forEach(it => {
       this.itemKeys[it.id] = it; 
     })
+    this.ids = Object.keys(this.itemKeys)
+    this.ids.sort();
+    this.idsString = this.ids.join(',');
 
     this.setRectCache();
 

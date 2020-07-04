@@ -192,10 +192,6 @@ export default class ElementView extends UIElement {
                 }
 
             }
-
-            if (this.$selection.select(...items)) {
-                this.emit('refreshSelection')
-            }
         }
     }
 
