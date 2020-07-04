@@ -12,6 +12,6 @@ export default function _refreshSelection (editor, isSelectedItems = false, dela
     setTimeout(() => {
         editor.emit('refreshSelection');
         editor.emit('refreshSelectionTool');        
-    }, delay + delay)    
+    }, delay * 2)    
 
 }

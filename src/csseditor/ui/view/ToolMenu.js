@@ -14,6 +14,7 @@ export default class ToolMenu extends UIElement {
           <div class='draw-items' ref='$items' data-selected-value="${this.$editor.layout}">
 
             <SelectTool />
+            <AddArtboard />
             <span data-item='css'>
               <AddRect />
               <AddCircle />         

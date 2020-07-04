@@ -51,17 +51,15 @@ export default class OffsetPathListEditor extends UIElement {
     }
 
     getOptions () {
-        var artboard = this.$selection.currentArtboard;
+        var project = this.$selection.currentProject;
 
         var paths = {} 
-        if (artboard) {
-            artboard
-            .allLayers
-              .filter(it => it.is('svg-path', 'svg-polygon'))
-              .filter(it => it['motion-based'])
-              .forEach(it => {
-                paths[it.id] = it 
-              });    
+        if (project) {
+            project.allLayers.filter(it => it.is('svg-path', 'svg-polygon'))
+                             .filter(it => it['motion-based'])
+                             .forEach(it => {
+                                paths[it.id] = it 
+                            });    
         }
 
         return {

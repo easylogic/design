@@ -26,7 +26,6 @@ import BackgroundClipProperty from "./BackgroundClipProperty";
 import SelectorProperty from "./SelectorProperty";
 import PositionProperty from "./PositionProperty";
 import ProjectProperty from "./ProjectProperty";
-import ArtBoardProperty from "./ArtBoardProperty";
 import LayerTreeProperty from "./LayerTreeProperty";
 import ArtBoardSizeProperty from "./ArtBoardSizeProperty";
 import ImageProperty from "./ImageProperty";
@@ -83,7 +82,6 @@ export default {
   ArtBoardSizeProperty,
   LayerTreeProperty,
   ProjectProperty,
-  ArtBoardProperty,
   PositionProperty,
   SelectorProperty,
   BackgroundClipProperty,

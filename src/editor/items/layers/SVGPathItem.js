@@ -38,15 +38,8 @@ export class SVGPathItem extends SVGItem {
       this.json.path.resetSegment(obj.segments);
     }
 
-    // if (obj.rect) {
-
-    //   this.json.width = Length.px(obj.rect.width);
-    //   this.json.height = Length.px(obj.rect.height);
-  
-    //   this.setScreenX(Length.px(obj.rect.x))
-    //   this.setScreenY(Length.px(obj.rect.y))
-    // }
-
+    this.setCache();  // 캐쉬를 해줘야 최종 업데이트가 된다. 
+    this.changed();
   }
   
   setCache () {
@@ -110,7 +103,6 @@ export class SVGPathItem extends SVGItem {
 
 
   updateFunction (currentElement, isChangeFragment = true, isLast = false) {
-
     if (!currentElement) return; 
     var $path = currentElement.$('path');
     $path.attr('d', this.json.d);

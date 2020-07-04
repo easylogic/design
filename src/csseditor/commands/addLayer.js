@@ -2,11 +2,11 @@ import _refreshSelection from "./_refreshSelection";
 
 export default function addLayer (editor, layer, rect = {}, isSelected = true) {
 
-    var containerItem = editor.selection.current || editor.selection.currentArtboard
+    var containerItem = editor.selection.current || editor.selection.currentProject
 
     if (containerItem) {
 
-        if (!containerItem.enableHasChildren()) {
+        if (!containerItem.is('project') && !containerItem.enableHasChildren()) {
             containerItem = containerItem.parent;
         }
 
@@ -20,11 +20,5 @@ export default function addLayer (editor, layer, rect = {}, isSelected = true) {
         }
 
         _refreshSelection(editor,true, 10)
-    } else {
-        editor.emit('addArtBoard')
-
-        setTimeout(() => {
-            addLayer(editor, layer, rect);
-        }, 50)
     }
 }

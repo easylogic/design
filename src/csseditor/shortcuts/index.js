@@ -36,7 +36,7 @@ import addCircleL from "./add.circle.l";
 import addText from "./add.text";
 import addPath from "./add.path";
 import addBrush from "./add.brush";
-import selectArtboard from "./select.artboard";
+import addArtboard from "./add.artboard";
 import itemMoveDepthUp from "./item.move.depth.up";
 import itemMoveDepthDown from "./item.move.depth.down";
 import itemDeleteShift from "./item.delete.shift";
@@ -48,7 +48,7 @@ import ungroupItem from "./ungroup.item";
 export default [
     // add layer 
     selectView,
-    selectArtboard,
+    addArtboard,
     addRect,
     addRectM,
     addCircle,

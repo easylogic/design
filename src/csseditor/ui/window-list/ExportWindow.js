@@ -100,14 +100,9 @@ ${project.artboards.map(item => item.html).join('\n')}
 
 
         // export svg image 
-        if (this.$selection.currentArtboard) {
-            var svgString = ExportManager.generateSVG(this.$editor, this.$selection.currentArtboard);
-            this.refs.$svgimage.text(svgString);
-            this.refs.$svgimagePreview.html(Dom.createByHTML(svgString));
-        } else  {
-            this.refs.$svgimage.empty();
-            this.refs.$svgimagePreview.empty();
-        }
+        var svgString = ExportManager.generateSVG(this.$editor, this.$selection.current);
+        this.refs.$svgimage.text(svgString);
+        this.refs.$svgimagePreview.html(Dom.createByHTML(svgString));
     }
 
     makeProjectStyle (item) {

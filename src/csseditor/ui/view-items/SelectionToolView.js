@@ -282,6 +282,7 @@ export default class SelectionToolView extends SelectionToolBind {
 
         this.removeOriginalRect();
 
+        // 가이드 영역 캐쉬 
         this.guideView.makeGuideCache();        
 
         var current = this.$selection.current;
@@ -314,9 +315,6 @@ export default class SelectionToolView extends SelectionToolBind {
         if(x.is(0) && y.is(0) && width.is(0) && height.is(0)) {
             x.add(-10000);
             y.add(-10000);       
-        } else if (!this.$selection.currentArtboard) {
-            x.add(-10000);
-            y.add(-10000);            
         }
 
         var left = x, top = y;
@@ -330,43 +328,42 @@ export default class SelectionToolView extends SelectionToolBind {
 
     refreshPositionText (x, y, width, height) {
 
-        if (this.$selection.currentArtboard) {
-            var newX = Length.px(x.value - this.$selection.currentArtboard.x.value / this.$editor.scale).round(1);
-            var newY = Length.px(y.value - this.$selection.currentArtboard.y.value / this.$editor.scale).round(1);
-            var newWidth = Length.px(width.value / this.$editor.scale).round(1);
-            var newHeight = Length.px(height.value / this.$editor.scale).round(1);
 
-            var text = ''
-            switch(this.pointerType) {
-                case 'move': text =  `X: ${newX}, Y: ${newY}`; break;
-                case 'to top': text =  `Y: ${newY}, H: ${newHeight}`; break;         
-                case 'to bottom': text =  `Y: ${newY}, H: ${newHeight}`; break;
-                case 'to left': text =  `X: ${newX}, W: ${newWidth}`; break;
-                case 'to right': text =  `X: ${newX}, W: ${newWidth}`; break;
-                case 'to top right': text =  `X: ${newX}, Y: ${newY}, W: ${newWidth}, H: ${newHeight}`; break;
-                case 'to top left': text =  `X: ${newX}, Y: ${newY}, W: ${newWidth}, H: ${newHeight}`; break;
-                case 'to bottom right': text =  `W: ${newWidth}, H: ${newHeight}`; break;
-                case 'to bottom left': text =  `X: ${newX}, Y: ${newY}, W: ${newWidth}, H: ${newHeight}`; break;
-            }
-            
-            this.setPositionText(text);
+        var newX = Length.px(x.value / this.$editor.scale).round(1);
+        var newY = Length.px(y.value / this.$editor.scale).round(1);
+        var newWidth = Length.px(width.value / this.$editor.scale).round(1);
+        var newHeight = Length.px(height.value / this.$editor.scale).round(1);
 
-            var length = this.$selection.length;
-            var title = ''; 
-
-            if (length === 1) {
-                var current = this.$selection.current
-                title = current.title || current.getDefaultTitle();
-                const iconString = icon[iconType[current.itemType] || iconType.rect]
-                this.refs.$selectionIcon.html(iconString);  
-            } else if (length >= 2) {
-                title = `multi : ${length}`;
-                this.refs.$selectionIcon.html(icon.flag);                
-            }
- 
-            this.refs.$selectionTitle.text(title)
-            this.refs.$selectionMove.attr('title', title)
+        var text = ''
+        switch(this.pointerType) {
+            case 'move': text =  `X: ${newX}, Y: ${newY}`; break;
+            case 'to top': text =  `Y: ${newY}, H: ${newHeight}`; break;         
+            case 'to bottom': text =  `Y: ${newY}, H: ${newHeight}`; break;
+            case 'to left': text =  `X: ${newX}, W: ${newWidth}`; break;
+            case 'to right': text =  `X: ${newX}, W: ${newWidth}`; break;
+            case 'to top right': text =  `X: ${newX}, Y: ${newY}, W: ${newWidth}, H: ${newHeight}`; break;
+            case 'to top left': text =  `X: ${newX}, Y: ${newY}, W: ${newWidth}, H: ${newHeight}`; break;
+            case 'to bottom right': text =  `W: ${newWidth}, H: ${newHeight}`; break;
+            case 'to bottom left': text =  `X: ${newX}, Y: ${newY}, W: ${newWidth}, H: ${newHeight}`; break;
         }
+        
+        this.setPositionText(text);
+
+        var length = this.$selection.length;
+        var title = ''; 
+
+        if (length === 1) {
+            var current = this.$selection.current
+            title = current.title || current.getDefaultTitle();
+            const iconString = icon[iconType[current.itemType] || iconType.rect]
+            this.refs.$selectionIcon.html(iconString);  
+        } else if (length >= 2) {
+            title = `multi : ${length}`;
+            this.refs.$selectionIcon.html(icon.flag);                
+        }
+
+        this.refs.$selectionTitle.text(title)
+        this.refs.$selectionMove.attr('title', title)
     }
 
     setPositionText (text) {

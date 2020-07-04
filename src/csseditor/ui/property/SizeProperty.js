@@ -12,6 +12,10 @@ export default class SizeProperty extends BaseProperty {
     return this.$i18n('size.property.title');
   }
 
+  afterRender() {
+    this.show();
+  }
+
   [EVENT('refreshSelection')]() {
     this.refreshShowIsNot('project');
   }

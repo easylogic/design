@@ -78,34 +78,34 @@ export default class BrushDrawView extends UIElement {
     }
 
     makeBrushLayer (pathRect) {
-        var artboard = this.$selection.currentArtboard
+        var project = this.$selection.currentProject
         var layer; 
-        if (artboard) {
 
-            var x = pathRect.x / this.scale;
-            var y = pathRect.y / this.scale;
-            var width = pathRect.width / this.scale;
-            var height = pathRect.height / this.scale; 
 
-            // rect 기준으로 상대 좌표로 다시 변환 
-            const simplyPoints = Point.simply(this.state.points, this.state.tolerance)
-            const parser = new PathParser(PathStringManager.makePathByPoints(simplyPoints))
-            const d = PathGenerator.generatorPathString(parser.convertGenerator(), x, y, this.scale);
+        var x = pathRect.x / this.scale;
+        var y = pathRect.y / this.scale;
+        var width = pathRect.width / this.scale;
+        var height = pathRect.height / this.scale; 
 
-            layer = artboard.add(new SVGBrushItem({
-                width: Length.px(width),
-                height: Length.px(height),
-                d,
-                totalLength: this.totalPathLength
-            }))
+        // rect 기준으로 상대 좌표로 다시 변환 
+        const simplyPoints = Point.simply(this.state.points, this.state.tolerance)
+        const parser = new PathParser(PathStringManager.makePathByPoints(simplyPoints))
+        const d = PathGenerator.generatorPathString(parser.convertGenerator(), x, y, this.scale);
 
-            FIELDS.forEach(key => {
-                if (this.state[key]) layer.reset({ [key]: this.state[key] })    
-            });            
+        layer = project.add(new SVGBrushItem({
+            width: Length.px(width),
+            height: Length.px(height),
+            d,
+            totalLength: this.totalPathLength
+        }))
 
-            layer.setScreenX(x);
-            layer.setScreenY(y);      
-        }
+        FIELDS.forEach(key => {
+            if (this.state[key]) layer.reset({ [key]: this.state[key] })    
+        });            
+
+        layer.setScreenX(x);
+        layer.setScreenY(y);      
+
 
         return layer; 
     }

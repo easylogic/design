@@ -4,12 +4,12 @@ export default {
 
         if (editor.selection.length === 0) return; 
 
-        const artboard = editor.selection.currentArtboard
+        const project = editor.selection.currentProject
 
-        if (artboard) {
+        if (project) {
 
             // no 캐쉬 
-            artboard.generateListNumber()
+            project.generateListNumber()
 
             // depth 캐쉬 
             const list = editor.selection.map(item => {
@@ -50,7 +50,7 @@ export default {
 
             editor.selection.select(groupLayer);
 
-            editor.emit('refreshArtboard')
+            editor.emit('refreshAll')
         }
 
     }

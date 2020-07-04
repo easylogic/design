@@ -101,11 +101,13 @@ export default class LayerTreeProperty extends BaseProperty {
   getIcon (item) {
     // return '';
 
-    if (item.isGroup) {
+    if (item.isGroup && item.is('artboard') === false) {
       return icon.group
     }
 
     switch(item.itemType) {
+    case 'artboard': 
+      return icon.artboard;
     case 'circle': 
       return icon.lens;
     case 'image': 
@@ -169,10 +171,10 @@ export default class LayerTreeProperty extends BaseProperty {
 
   [LOAD("$layerList") + VDOM]() {
 
-    var artboard = this.$selection.currentArtboard;
-    if (!artboard) return ''
+    var project = this.$selection.currentProject;
+    if (!project) return ''
 
-    return this.makeLayerList(artboard, 0) + /*html*/`
+    return this.makeLayerList(project, 0) + /*html*/`
       <div class='layer-item ' data-depth="0" data-is-last="true">
       </div>
     `
@@ -219,11 +221,11 @@ export default class LayerTreeProperty extends BaseProperty {
     var sourceLayerId = e.dataTransfer.getData('layer/id');
 
     if (targetLayerId === sourceLayerId) return; 
-    var artboard = this.$selection.currentArtboard
+    var project = this.$selection.currentProject
 
-    if (artboard) {
-      var targetItem = artboard.searchById(targetLayerId);
-      var sourceItem = artboard.searchById(sourceLayerId);
+    if (project) {
+      var targetItem = project.searchById(targetLayerId);
+      var sourceItem = project.searchById(sourceLayerId);
 
       if (targetItem && targetItem.hasParent(sourceItem.id)) return; 
 
@@ -235,7 +237,7 @@ export default class LayerTreeProperty extends BaseProperty {
         hideDragPointer: true 
       })
 
-      this.emit('refreshArtboard')      
+      this.emit('refreshAll')      
 
     }
   }
@@ -252,13 +254,11 @@ export default class LayerTreeProperty extends BaseProperty {
 
       var id = input.closest('layer-item').attr('data-layer-id');
 
-      var artboard = this.$selection.currentArtboard;
-      if (artboard) {
-        var item = artboard.searchById(id)
+      var project = this.$selection.currentProject;
+      if (project) {
+        var item = project.searchById(id)
         if (item) {
-          item.reset({
-            name: text
-          })
+          item.reset({ name: text })
         }
   
       }
@@ -303,14 +303,14 @@ export default class LayerTreeProperty extends BaseProperty {
   }
 
   [CLICK('$layerList .layer-item label')] (e) {
-    var artboard = this.$selection.currentArtboard
-    if (artboard) {
+    var project = this.$selection.currentProject
+    if (project) {
 
       var $item = e.$dt.closest('layer-item')
       $item.onlyOneClass('selected');
 
       var id = $item.attr('data-layer-id');
-      var item = artboard.searchById(id);
+      var item = project.searchById(id);
       this.$selection.select(item)
 
       this.emit('refreshSelection');      
@@ -319,12 +319,12 @@ export default class LayerTreeProperty extends BaseProperty {
   }
 
   [CLICK('$layerList .layer-item .visible')] (e) {
-    var artboard = this.$selection.currentArtboard
-    if (artboard) {
+    var project = this.$selection.currentProject
+    if (project) {
       var $item = e.$dt.closest('layer-item')
       var id = $item.attr('data-layer-id');
 
-      var item = artboard.searchById(id);      
+      var item = project.searchById(id);      
       e.$dt.attr('data-visible', !item.visible);
 
       this.emit('setAttribute', {
@@ -335,12 +335,12 @@ export default class LayerTreeProperty extends BaseProperty {
 
 
   [CLICK('$layerList .layer-item .lock')] (e) {
-    var artboard = this.$selection.currentArtboard
-    if (artboard) {
+    var project = this.$selection.currentProject
+    if (project) {
       var $item = e.$dt.closest('layer-item')
       var id = $item.attr('data-layer-id');
 
-      var item = artboard.searchById(id);
+      var item = project.searchById(id);
       
       e.$dt.attr('data-lock', !item.lock);
 
@@ -350,21 +350,6 @@ export default class LayerTreeProperty extends BaseProperty {
     }
   }
 
-
-  // [CLICK('$layerList .layer-item .copy')] (e) {
-  //   var artboard = this.$selection.currentArtboard
-  //   if (artboard) {
-  //     var $item = e.$dt.closest('layer-item')
-  //     var id = $item.attr('data-layer-id');
-
-  //     var obj = artboard.searchById(id)
-  //     var copyObject = obj.copy();
-
-  //     this.$selection.select(copyObject);
-  //     this.refresh();
-  //     this.emit('refreshElement', null, false, true);
-  //   }
-  // }
 
   [EVENT('emptySelection')] () {
     this.refs.$layerList.$$('.selected').forEach(it => {

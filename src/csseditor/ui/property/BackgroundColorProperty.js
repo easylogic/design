@@ -15,6 +15,10 @@ export default class BackgroundColorProperty extends BaseProperty {
     return this.$i18n('background.color.property.title');
   }
 
+  afterRender() {
+    this.show();
+  }
+
   getOverflowList () {
     return overflow_list.map(it => {
       return `${it}:${this.$i18n(`background.color.property.overflow.${it}`)}`

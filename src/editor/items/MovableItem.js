@@ -460,4 +460,11 @@ export class MovableItem extends Item {
   orderTop() {}
   //TODO: 전체중에 마지막으로 보내기 
   orderBottom () {}
+
+
+  hasPoint (x, y) {
+    return this.screenX.value <= x && x <= this.screenX2.value &&
+           this.screenY.value <= y && y <= this.screenY2.value;
+  }
+
 }

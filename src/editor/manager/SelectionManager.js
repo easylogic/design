@@ -27,7 +27,6 @@ export class SelectionManager {
   constructor() {
 
     this.project = null;
-    this.artboard = null;
     this.items = [];
     this.itemKeys = {} 
     this.colorsteps = []
@@ -50,10 +49,6 @@ export class SelectionManager {
     return this.project;
   }
 
-  get currentArtboard () {
-    return this.artboard;
-  }
-
   get isEmpty () {
     return !this.length 
   }
@@ -63,13 +58,9 @@ export class SelectionManager {
   }
 
   getRootItem (current) {
-    var rootItem = current || this.currentArtboard;
-    if (current) {
-      if (current.is('artboard')) {
-        rootItem = current; 
-      } else if (current.parent) {
+    var rootItem = current;
+    if (current && current.parent) {
         rootItem = current.parent; 
-      }
     }
 
     return rootItem;
@@ -85,20 +76,6 @@ export class SelectionManager {
 
   selectProject (project) {
     this.project = project;
-    this.artboard = null;
-    if (this.project.artboards.length) {
-      this.selectArtboard(this.project.artboards[0]);
-    }
-  }
-
-  selectArtboard (artboard) {
-    this.artboard = artboard;
-
-    this.items = [];
-    if (this.artboard.layers.length) {
-      this.select(this.artboard.layers[0]);
-    }
-
   }
 
   get isRelative () {
@@ -160,33 +137,29 @@ export class SelectionManager {
     return this.itemKeys[id];
   }
 
-  isArtBoard () {
-    return this.items.length ?  this.current.is('artboard') : false;
-  }
-
   empty () {
     this.select()
   }
 
   itemsByIds(ids = null) {
     if (isArray(ids)) {
-      return _traverse(this.artboard, ids)
+      return _traverse(this.project, ids)
     } else if (isString(ids) || isObject(ids)) {
-      return _traverse(this.artboard, [ids]);
+      return _traverse(this.project, [ids]);
     } else {
       return this.items;
     }
   }
 
   selectById(id) {
-    this.select(... _traverse(this.artboard, id))
+    this.select(... _traverse(this.project, [id]))
   }
 
   addById(id) {
 
     if (this.itemKeys[id]) return;
 
-    this.select(...this.items, ... _traverse(this.artboard, id))
+    this.select(...this.items, ... _traverse(this.project, id))
   }  
 
   removeById(id) {
@@ -295,13 +268,13 @@ export class SelectionManager {
 
     var prevItem = item; 
     var parent = prevItem.parent; 
-    var hasParent = !prevItem.is('artboard') && parentItems.includes(parent); 
+    var hasParent = parentItems.includes(parent); 
 
     while(!hasParent) {
       if (isUndefined(parent)) break; 
       prevItem = parent; 
       parent = parent.parent; 
-      hasParent = !prevItem.is('artboard') && parentItems.includes(parent); 
+      hasParent = parentItems.includes(parent); 
     }
 
     return hasParent; 

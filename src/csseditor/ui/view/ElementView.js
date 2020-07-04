@@ -102,6 +102,7 @@ export default class ElementView extends UIElement {
             && $el.attr('data-segment') !== 'true';
     }
 
+    // 빈 영역 드래그 해서 선택하기 
     [POINTERSTART('$view') + IF('checkEmptyElement') + MOVE('movePointer') + END('moveEndPointer')] (e) {
 
         this.$target = Dom.create(e.target);
@@ -136,6 +137,10 @@ export default class ElementView extends UIElement {
 
     }
 
+    checkInAreaForLayers (target, rect) {
+        return target.checkInAreaForLayers(rect);
+    }
+
     movePointer (dx, dy) {
         const isShiftKey = this.$config.get('bodyEvent').shiftKey;
 
@@ -166,21 +171,24 @@ export default class ElementView extends UIElement {
             rect.x2 = Length.px(rect.x.value + rect.width.value);
             rect.y2 = Length.px(rect.y.value + rect.height.value); 
 
-            var artboard = this.$selection.currentArtboard;
-            var items = this.$selection.items; 
-            if (artboard) {
+            var project = this.$selection.currentProject;
+            var items = []; 
+            if (project) {
                 Object.keys(rect).forEach(key => {
                     rect[key].div(this.$editor.scale)
                 })
-    
-                var items = artboard.checkInAreaForLayers(rect);
 
                 if (rect.width.value === 0 && rect.height.value === 0) {
                     items = [] 
-                }                 
+                } else {
+                    // 프로젝트 내에 있는 모든 객체 검색 
+                    project.artboards.forEach(artboard => {
+                        items.push(...artboard.checkInAreaForLayers(rect))
+                    })
+                }
     
                 if (this.$selection.select(...items)) {
-                    this.selectCurrentForBackgroundView(...items)
+                    this.selectCurrent(...items)
                 }
 
             }
@@ -216,27 +224,24 @@ export default class ElementView extends UIElement {
 
         if (this.$editor.isSelectionMode()) {
 
-            var artboard = this.$selection.currentArtboard;
+            var project = this.$selection.currentProject;
             var items = [] 
-            if (artboard) {
+            if (project) {
                 Object.keys(rect).forEach(key => {
                     rect[key].div(this.$editor.scale)
                 })
 
-                items = artboard.checkInAreaForLayers(rect);
+                // 프로젝트 내에 있는 모든 객체 검색 
+                project.artboards.forEach(artboard => {
+                    items.push(...artboard.checkInAreaForLayers(rect))
+                })
 
                 if (rect.width.value === 0 && rect.height.value === 0) {
-                    items = [artboard] 
+                    items = [] 
                 } 
 
-                if (items.length === 0) {
-                    if (artboard.checkInArea(rect)) {
-                        items = [artboard]
-                    }
-                }
-
                 if (this.$selection.select(...items)) {
-                    this.selectCurrentForBackgroundView(...items)
+                    this.selectCurrent(...items)
                 }
     
                 if (items.length) {
@@ -287,9 +292,27 @@ export default class ElementView extends UIElement {
         return this.$editor.isSelectionMode()
     }
 
+    findArtboard(point) {
+        return this.$selection.currentProject.layers.find(it => it.is('artboard') && it.hasPoint(point.x, point.y))
+    }
+
+    // 특정 element 선택 후 이동하기 
     [POINTERSTART('$view .element-item') + IF('checkEditMode')  + MOVE('calculateMovedElement') + END('calculateEndedElement')] (e) {
         this.startXY = e.xy ; 
         this.$element = e.$dt;
+
+        this.rect = this.refs.$body.rect();            
+        this.canvasOffset = this.refs.$view.rect();
+
+        this.canvasPosition = {
+            x: this.canvasOffset.left - this.rect.x,
+            y: this.canvasOffset.top - this.rect.y
+        }
+
+        this.newScreenXY = this.screenXY = {
+            x: this.startXY.x - this.rect.x,
+            y: this.startXY.y - this.rect.y,
+        }
 
         if (this.$element.hasClass('text') && this.$element.hasClass('selected')) {
             return false; 
@@ -309,8 +332,9 @@ export default class ElementView extends UIElement {
             } else {
                 this.$selection.selectById(id);    
             }
-
         }
+
+        this.currentContainer = this.findArtboard(this.screenXY);
     
         this.selectCurrent(...this.$selection.items)
         this.$selection.setRectCache()
@@ -319,8 +343,72 @@ export default class ElementView extends UIElement {
     }
 
     calculateMovedElement (dx, dy) {
-        this.children.$selectionTool.refreshSelectionToolView(dx, dy, 'move');
+
+        // dx, dy 는 마우스 포인터 기준의 좌표고 
+        // screenX, screenY 기준의 dx, dy 가 아니기 때문에 
+        // screenX, screenY 기준의 dx, dy 가 필요하다. 
+        // 이 때, 객체의 container 가 바뀌는 시점이 오는데 
+        // container 가 바뀔 때 그 시점 기준으로 startXY 를 다시 맞춰야 한다. 
+        // 즉, dx, dy 의 포인트가 달아지는데.. 
+        // 예를 들어 startXY 에서 시작했는데 pointXY 로 startXY 가 바뀌게 되면 
+        // dx , dy 를 어떻게 계산해야할까? 
+        // 초기 screenX.x + dx 가 총 이동 거리였다면 
+        //     pointXY.x + X 가 새로운 이동 거리가 되고   여기서 X 를 구해야한다. 
+        // startXY.x + dx  - pointXY.x = newDX 가 되는가? 
+
+        const newDx = this.screenXY.x + dx - this.newScreenXY.x;
+        const newDy = this.screenXY.y + dy - this.newScreenXY.y;
+
+        this.children.$selectionTool.refreshSelectionToolView(newDx, newDy, 'move');
         this.updateRealPosition();     
+
+        this.replaceContainer(dx, dy);
+    }
+
+    // 영역에 따라  현재 선택된 객체의  artboard 컨테이너  바꾸기 
+    replaceContainer (dx, dy) {
+
+        const current = this.$selection.current; 
+        if (!current) return; 
+        if (current.is('artboard')) return; 
+
+        const screenXY = {
+            x: this.startXY.x + dx - this.rect.x,
+            y: this.startXY.y + dy - this.rect.y,
+        }       
+
+        const targetContainer = this.findArtboard(screenXY);
+
+        // 영역이 없고 project 동일한 프로젝트가 아니라면 
+        if (!targetContainer) {
+            if (this.currentContainer != this.$selection.currentProject) {
+                this.currentContainer = this.$selection.currentProject;
+                this.$selection.each(item => {
+                    this.currentContainer.add(item);
+                })     
+                this.initDragStart(dx, dy);
+            }
+            
+        } else if (targetContainer.id !== this.currentContainer.id) {
+
+            this.currentContainer = targetContainer;
+            this.$selection.each(item => {
+                this.currentContainer.add(item);
+            })       
+
+            this.initDragStart(dx, dy);
+        }         
+    }
+
+    // container 가 바뀌었을 때  마우스 포인터 초기화를 한다. 
+    initDragStart (dx, dy) {
+        this.newScreenXY = {
+            x: this.startXY.x + dx - this.rect.x,
+            y: this.startXY.y + dy - this.rect.y,
+        }     
+        this.$selection.reselect();
+        this.selectCurrent(...this.$selection.items)
+        this.emit('refreshAll')
     }
 
     updateRealPositionByItem (item) {
@@ -378,6 +466,7 @@ export default class ElementView extends UIElement {
 
 
     [BIND('$view')] () {
+    
         return {
             style: {
                 // 'background-image': createGridLine(100),
@@ -388,17 +477,6 @@ export default class ElementView extends UIElement {
         }
     }    
 
-    [EVENT('addElement')] () {
-        var artboard = this.$selection.currentArtboard || { html : ''} 
-        var html = artboard.html;
-
-        this.setState({ html }, false)
-        // this.bindData('$view');
-        this.refs.$view.updateDiff(html)
-
-        this.emit('refreshSelectionTool')
-    }
-
     selectCurrent (...args) {
         this.state.cachedCurrentElement = {}
         var $selectedElement = this.$el.$$('.selected');
@@ -407,8 +485,7 @@ export default class ElementView extends UIElement {
             $selectedElement.forEach(it => it.removeClass('selected'))
         }
 
-        if(args.length) {
-
+        if (args.length) {
             var selector = args.map(it => `[data-id='${it.id}']`).join(',')
 
             var list = this.$el.$$(selector);
@@ -417,54 +494,12 @@ export default class ElementView extends UIElement {
                 this.state.cachedCurrentElement[it.attr('data-id')] = it; 
                 it.addClass('selected')
             })
-            
-        } else {
-            this.$selection.select(this.$selection.currentArtboard)
-        }    
-
-        this.emit('refreshSelectionTool')
-
-    }
-
-
-    selectCurrentForBackgroundView (...args) {
-        this.state.cachedCurrentElement = {}
-        var $selectedElement = this.$el.$$('.selected');
-
-        if ($selectedElement) {
-            $selectedElement.forEach(it => it.removeClass('selected'))
-        }
-
-        if(args.length) {
-
-            var selector = args.map(it => `[data-id='${it.id}']`).join(',')
-
-            var list = this.$el.$$(selector);
-            
-            list.forEach(it => {
-                this.state.cachedCurrentElement[it.attr('data-id')] = it; 
-                it.addClass('selected')
-            })
-            
-        } else {
-            // this.$selection.select()
-        }
-        this.emit('refreshSelection')           
-
-        this.emit('refreshSelectionTool')
-
-    }    
     
-    [EVENT('refreshSelection')] () {
-
-        if (!this.state.html) {
-            this.trigger('addElement');
         }
 
-
-        this.emit('refreshSelectionTool')
-    }
-
+        this.children.$selectionTool.initSelectionTool()
+    } 
+    
     modifyScale () {
         this.refs.$view.css({
             transform: `scale(${this.$editor.scale})`
@@ -507,33 +542,44 @@ export default class ElementView extends UIElement {
 
     }    
 
-    [EVENT('playTimeline', 'moveTimeline')] () {
+    [EVENT('playTimeline', 'moveTimeline')] (artboard) {
 
-        var artboard = this.$selection.currentArtboard;
 
-        if (artboard) {
-            var timeline = artboard.getSelectedTimeline();
-            timeline.animations.map(it => artboard.searchById(it.id)).forEach(current => {
-                // 레이어 업데이트 사항 중에 updateFunction 으로 업데이트 되는 부분 
-                // currentTime 도 매번 업데이트 되기 때문에 
-                // playbackRate 도 매번 업데이트 되고
-                // 그래서 막는게 필요하다.                 
-                // timeline 에서 실행되는것에 따라서  layer 에서 각자 알아서 업데이트 한다. 
-                this.updateTimelineElement(current, true, false);
-            })
-        }
+        var timeline = artboard.getSelectedTimeline();
+        timeline.animations.map(it => artboard.searchById(it.id)).forEach(current => {
+            // 레이어 업데이트 사항 중에 updateFunction 으로 업데이트 되는 부분 
+            // currentTime 도 매번 업데이트 되기 때문에 
+            // playbackRate 도 매번 업데이트 되고
+            // 그래서 막는게 필요하다.                 
+            // timeline 에서 실행되는것에 따라서  layer 에서 각자 알아서 업데이트 한다. 
+            this.updateTimelineElement(current, true, false);
+        })
     }    
 
+    /**
+     * 
+     * isRefreshSelectionTool 옵션에 따라 selection 을 정의  
+     * 
+     * 기본적으로 project 내부의 전체 html 을 만들고 기존 dom 과 비교해서 업데이트 한다. 
+     * @param {boolean} isRefreshSelectionTool 
+     */
     [EVENT('refreshAllCanvas')] (isRefreshSelectionTool = true) {
-        var artboard = this.$selection.currentArtboard || { html : ''} 
-        var html = artboard.html
-
+        var project = this.$selection.currentProject || { html : ''} 
+        var html = project.html
         this.setState({ html }, false)
         // this.bindData('$view');
+
+        // html 상태 업데이트 하고 
         this.refs.$view.updateDiff(html)
 
+        // 캐쉬된 element 초기화  
+        this.state.cachedCurrentElement = {} 
+
+        // 좌표 초기화 
+        this.updateRealPosition();
+
         if (isRefreshSelectionTool) {
-            this.emit('refreshSelectionTool')
+            this.children.$selectionTool.initSelectionTool()
         }
     }
 

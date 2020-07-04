@@ -23,20 +23,14 @@ export default class GuideView {
     }
 
     makeGuideCache () {
-        var artboard = this.$selection.currentArtboard;
+        var project = this.$selection.currentProject;
         this.cachedExtraItems = [] 
-        if (artboard) {
+        if (project) {
 
-            if (this.$selection.isArtBoard()) {
-                // 선택한 영역이 artboard 일 때는  다른 객체와 거리를 재지 않는다. 
-                // 하위 모든 것들이 artboard 안에 있기 때문이다. 
-                this.cachedExtraItems = [];
-            } else {
-                this.cachedExtraItems = artboard.allLayers.filter(it => {
-                    return !this.$selection.check(it) || (it.is('artboard') && this.$selection.currentArtboard != it); 
-                })
-                
-            }
+
+            this.cachedExtraItems = project.allLayers.filter(it => {
+                return !this.$selection.check(it) && it.is('project') === false; 
+            })
 
             this.rect = this.$selection.allRect ? this.$selection.allRect.clone() : null;
         }
@@ -169,7 +163,6 @@ export default class GuideView {
     }
 
     compareX (A, B, dist = MAX_DIST) {
-
         // source and target are an index 
         // 0: start, 1 : center, 2 : end 
         var AX = [A.screenX.value, A.centerX.value, A.screenX2.value]

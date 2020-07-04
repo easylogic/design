@@ -35,21 +35,6 @@ export class SVGTextItem extends SVGItem {
   }
 
 
-
-  updatePathItem (obj) {
-
-    // shape-inside 
-    // shape-subtract 
-
-    this.json.d = obj.d; 
-    this.json.totalLength = obj.totalLength;
-    this.json.path = new PathParser(obj.d);
-
-    if(obj.segments) {
-      this.json.path.resetSegment(obj.segments);
-    }
-  }
-  
   setCache () {
     this.rect = this.clone();
   }
