@@ -14,7 +14,12 @@ export default {
     command: 'load.json', 
     execute: function (editor, json) {
 
-        json = json || editor.loadResource('projects', []);
+        json = json || editor.loadResource('projects');
+
+        // 값이 아무것도 없을 때 project 를 설정해준다. 
+        if (json.length === 0) {
+            json = [{itemType: 'project', layers: []}]
+        }
 
         var projects = json.map(p => createItem(editor, p))
 
